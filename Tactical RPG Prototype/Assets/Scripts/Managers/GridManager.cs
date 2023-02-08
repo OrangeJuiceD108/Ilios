@@ -21,7 +21,6 @@ public class GridManager : MonoBehaviour
             }
         }
         camera.transform.position = new Vector3(width/2, height/2, -10);
-    
     }
 }
 

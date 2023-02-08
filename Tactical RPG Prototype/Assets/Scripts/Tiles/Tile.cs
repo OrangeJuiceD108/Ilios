@@ -5,6 +5,7 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer highlight;
+    private Unit unit;
 
     void OnMouseEnter()
     {
@@ -14,5 +15,20 @@ public class Tile : MonoBehaviour
     void OnMouseExit()
     {
         highlight.enabled = false;
+    }
+
+    public Unit GetUnit()
+    {
+        return unit;
+    }
+
+    public void SetUnit(Unit newUnit)
+    {
+        unit = newUnit;
+    }
+
+    public void RemoveUnit()
+    {
+        unit = null;
     }
 }
