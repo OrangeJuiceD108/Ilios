@@ -4,15 +4,37 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public static GameManager Instance;
+    public GameState gameState;
+
+    void Awake()
     {
-        
+        Instance = this;
     }
 
-    // Update is called once per frame
-    void Update()
+    void Start()
     {
-        
+        ChangeState(GameState.GenerateGrid);
     }
+
+    public void ChangeState(GameState newState)
+    {
+        gameState = newState;
+        switch (newState)
+        {
+            case GameState.GenerateGrid:
+                GridManager.Instance.GenerateGrid();
+                ChangeState(GameState.SpawnUnits);
+                break;
+            case GameState.SpawnUnits:
+                UnitManager.Instance.GenerateUnits();
+                break;
+        }
+    }
+}
+
+public enum GameState
+{
+    GenerateGrid = 1,
+    SpawnUnits = 2,
 }
