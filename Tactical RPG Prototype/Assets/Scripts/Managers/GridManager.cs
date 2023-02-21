@@ -33,6 +33,13 @@ public class GridManager : MonoBehaviour
                 tiles.Add(new Vector2(x, y), newTile);
             }
         }
+        for(int x = 0; x < width; x++)
+        {
+            for(int y = 0; y < height; y++)
+            {
+                GetTile(new Vector2(x, y)).GenerateAdjacencies(x,y);
+            }
+        }
         camera.transform.position = new Vector3(width/2, height/2, -10);
     }
 

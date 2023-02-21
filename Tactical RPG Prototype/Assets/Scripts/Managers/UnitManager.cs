@@ -10,6 +10,8 @@ public class UnitManager : MonoBehaviour
 
     public GameObject[] unitPrefabs;
 
+    private Unit selectedUnit;
+
     void Awake()
     {
         Instance = this;
@@ -29,10 +31,38 @@ public class UnitManager : MonoBehaviour
     {
         if(unit.HasTile())
         {
+            
             unit.GetTile().RemoveUnit();
         }
         newLocation.SetUnit(unit);
         unit.SetTile(newLocation);
         unit.transform.position = newLocation.transform.position;
+    }
+
+    public void SelectUnit(Unit unit)
+    {
+        selectedUnit = unit;
+        selectedUnit.GenerateMoveRadius();
+    }
+
+    public void DeselectUnit()
+    {
+        selectedUnit = null;
+    }
+
+    public bool TryGetUnit(out Unit unit)
+    {
+        if(selectedUnit != null)
+        {
+            unit = selectedUnit;
+            return true;
+        }
+        unit = null;
+        return false;
+    }
+
+    public Unit GetSelectedUnit()
+    {
+        return selectedUnit;
     }
 }
