@@ -211,3 +211,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   highlight: {fileID: 2758828452201353988}
   secondHighlight: {fileID: 6540340151371926191}
+  adjacencies: []
+  walkable: 1
+  moveCost: 1
