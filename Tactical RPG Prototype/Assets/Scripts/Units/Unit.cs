@@ -10,12 +10,19 @@ public class Unit : MonoBehaviour
     [SerializeField] private Faction faction;
     
 
-    private int currentHP;
+    [SerializeField] private int currentHP;
     
     private Tile currentTile;
 
+    // List containing all of the tiles that the unit can move to
     private List<Tile> currentMoveRadius = new List<Tile>();
 
+    public void Awake()
+    {
+        currentHP = maxHP;
+    }
+
+    // Gets the tile that the Unit resides on
     public Tile GetTile()
     {
         if(currentTile == null)
@@ -25,11 +32,13 @@ public class Unit : MonoBehaviour
         return currentTile;
     }
 
+    // Sets the tile that the unit resides on
     public void SetTile(Tile newTile)
     {
         currentTile = newTile;
     }
 
+    // Checks if the unit is already on a tile
     public bool HasTile()
     {
         if(currentTile == null)
@@ -39,6 +48,35 @@ public class Unit : MonoBehaviour
         return true;
     }
 
+    // Getter method for the faction variable
+    public Faction GetFaction()
+    {
+        return faction;
+    }
+
+    // Checks if the faction given is an enemy of the faction of this unit
+    public bool OpposingFaction(Faction otherFaction)
+    {
+        if(otherFaction == Faction.Enemy)
+        {
+            if(faction == Faction.NPC || faction == Faction.Player)
+            {
+                return true;
+            }
+            return false;
+        }
+        else
+        {
+            if(faction == Faction.Enemy)
+            {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    // Recursive pair of functions that generates all of tiles that the unit can move to
+    // Probably need to edit this function later so that it doesn't generate a highlight, and make a different function for generating highlights
     public void GenerateMoveRadius()
     {
         currentTile.secondHighlight.enabled = true;
@@ -51,7 +89,6 @@ public class Unit : MonoBehaviour
             }
         }
     }
-    
     public void GenerateMoveRadius(Tile tile, int movesLeft)
     {
         tile.secondHighlight.enabled = true;
@@ -65,6 +102,7 @@ public class Unit : MonoBehaviour
         }
     }
 
+    // Gets ride of the move radius and deletes the highlights
     public void DeleteMoveRadius()
     {
         currentMoveRadius.ForEach(delegate(Tile tile)
@@ -74,7 +112,8 @@ public class Unit : MonoBehaviour
         currentMoveRadius.Clear();
     }
 
-    public bool withinMoveRange(Tile tile)
+    // Checks if a tile is contained within the move radius list
+    public bool WithinMoveRange(Tile tile)
     {
         if(currentMoveRadius.Count == 0 || !currentMoveRadius.Contains(tile))
         {
@@ -86,6 +125,22 @@ public class Unit : MonoBehaviour
         }
     }
 
+    // Reduces current HP by the damage parameter and returns the remaining hitpoints
+    public int TakeDamage(int damage)
+    {
+        currentHP-=damage;
+        Debug.Log("Remaining HP: " + currentHP);
+        return currentHP;
+    }
+
+    // Removes unit from tile that it is on and then destroys it
+    public void Die()
+    {
+        currentTile.RemoveUnit();
+        Destroy(gameObject);
+    }
+
+    // Enum for the faction of the unit
     public enum Faction
     {
         Player = 1,

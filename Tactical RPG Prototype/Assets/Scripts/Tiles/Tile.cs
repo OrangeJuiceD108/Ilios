@@ -48,11 +48,19 @@ public class Tile : MonoBehaviour
         Unit currUnit;
         if(UnitManager.Instance.TryGetUnit(out currUnit))
         {
-            if((unit == null || unit == currUnit) && currUnit.withinMoveRange(this))
+            if((unit == null || unit == currUnit) && currUnit.WithinMoveRange(this))
             {
                 UnitManager.Instance.GetSelectedUnit().DeleteMoveRadius();
                 UnitManager.Instance.UpdatePosition(currUnit, this);
                 UnitManager.Instance.DeselectUnit();
+            }
+            else if(unit.OpposingFaction(currUnit.GetFaction()))
+            {
+                int curHP = unit.TakeDamage(3);
+                if(curHP <=0)
+                {
+                    unit.Die();
+                }
             }
         }
         else
