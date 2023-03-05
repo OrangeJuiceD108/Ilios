@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class UnitManager : MonoBehaviour
 {
-    // needs one or more arrays to keep track of the various units, maybe one array containing enemies (red), one for pcs (blue), and one for npcs (green)
-
     // This hunk of code makes this a singleton
     public static UnitManager Instance;
     void Awake()
@@ -14,30 +12,66 @@ public class UnitManager : MonoBehaviour
     }
 
     // Contains the list of unit prefabs
-    public GameObject[] unitPrefabs;
+    public GameObject[] playerUnitPrefabs;
+    public GameObject[] enemyUnitPrefabs;
+    public GameObject[] alliedUnitPrefabs;
 
     // The unit currently selected by the player
     private Unit selectedUnit;
 
-    
+    // Lists of each type of unit
+    private List<Unit> playerUnits = new List<Unit>();
+    private List<Unit> enemyUnits = new List<Unit>();
+    private List<Unit> alliedUnits = new List<Unit>();
+
+    // Array of units and their positions that will be added when Generate units is called
+    /*  Uses a 4 digit code, explained as follows 
+        Digits 1 and 2:     The position x
+        Digits 3 and 4:     The position y
+        Digit 5:            The index of the unit in its array plus one
+        Digit 6:            The array the unit is contained in, 1 = player, 2 = enemy, 3 = ally
+    */
+    private List<int> plannedUnits = new List<int>();
+
+
     // This function spawns the units, right now most of the functionality is not there, this function's code will probably get replaced
     public void GenerateUnits()
     {
-        Unit newUnit = Instantiate(unitPrefabs[0]).GetComponent<Unit>();
-        newUnit.gameObject.name = "Slime";
+        foreach(int i in plannedUnits)
+        {
+            int code = i;
+            Unit newUnit;
+            if(code % 10 == 1)
+            {
+                code /= 10;
+                newUnit = Instantiate(playerUnitPrefabs[(code % 10)]).GetComponent<Unit>();
+                playerUnits.Add(newUnit);
+            }
+            else if(i % 10 == 2)
+            {
+                code /= 10;
+                newUnit = Instantiate(enemyUnitPrefabs[(code % 10)]).GetComponent<Unit>();
+                enemyUnits.Add(newUnit);
+            }
+            else
+            {
+                code /= 10;
+                Debug.Log(code);
+                newUnit = Instantiate(alliedUnitPrefabs[(code % 10)]).GetComponent<Unit>();
+                alliedUnits.Add(newUnit);
+            }
+            code /= 10;
+            newUnit.Init();
+            Tile startTile = GridManager.Instance.GetTile(new Vector2(code / 100, code % 100));
 
-        Tile startTile = GridManager.Instance.GetTile(new Vector2(3, 3));
+            UpdatePosition(newUnit, startTile);
+        }
+    }
 
-        this.UpdatePosition(newUnit, startTile);
-
-
-
-        newUnit = Instantiate(unitPrefabs[1]).GetComponent<Unit>();
-        newUnit.gameObject.name = "Frog";
-
-        startTile = GridManager.Instance.GetTile(new Vector2(12, 3));
-
-        this.UpdatePosition(newUnit, startTile);
+    public void AddUnit(int code, int x, int y)
+    {
+        int newCode = (((x * 100) + y) * 100) + ((code % 10) * 10) + (code /10);
+        plannedUnits.Add(newCode);
     }
 
     // For moving and placing units
@@ -58,10 +92,12 @@ public class UnitManager : MonoBehaviour
     {
         selectedUnit = unit;
         selectedUnit.GenerateMoveRadius();
+        // selectedUnit.GenerateAttackRadius();
     }
-
     public void DeselectUnit()
     {
+        selectedUnit.DeleteMoveRadius();
+        // selectedUnit.DeleteAttackRadius();
         selectedUnit = null;
     }
 
@@ -81,5 +117,51 @@ public class UnitManager : MonoBehaviour
     public Unit GetSelectedUnit()
     {
         return selectedUnit;
+    }
+
+    // Finds the nearest unit of the given type
+    public Unit NearestUnit(Unit.Faction faction, Vector2 location)
+    {
+        switch (faction)
+        {
+            case Unit.Faction.Player:
+                return NearestUnit(playerUnits, location);
+            case Unit.Faction.Enemy:
+                return NearestUnit(enemyUnits, location);
+            case Unit.Faction.NPC:
+                return NearestUnit(alliedUnits, location);
+            case Unit.Faction.PlayerOrNPC:
+                List<Unit> list = new List<Unit>(playerUnits);
+                list.AddRange(alliedUnits);
+                return NearestUnit(list, location);
+        }
+        return null;
+    }
+    public Unit NearestUnit(List<Unit> list, Vector2 location)
+    {
+        if(list.Count == 0)
+        {
+            return null;
+        }
+        Queue<Tile> queue = new Queue<Tile>();
+        List<Tile> checkedTiles = new List<Tile>();
+        Tile tile = GridManager.Instance.GetTile(location);
+        queue.Enqueue(tile);
+        bool found = false;
+        while(!found)
+        {
+            Tile item = queue.Dequeue();
+            Unit unit = item.GetUnit();
+            if(unit != null && list.Contains(unit))
+            {
+                return unit;
+            }
+            checkedTiles.Add(item);
+            item.GetAdjacencies().ForEach(delegate(Tile i)
+            {
+                queue.Enqueue(i);
+            });
+        }
+        return null;
     }
 }

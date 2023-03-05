@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,8 +11,6 @@ public class GridManager : MonoBehaviour
     {
         Instance = this;
     }
-    
-
 
     // This stores the camera so that it can be moved when generating the grid
     public new GameObject camera;
@@ -27,16 +26,30 @@ public class GridManager : MonoBehaviour
 
     // This is the field for the dimensions of the grid
     [Header("Grid Dimensions")]
+    
     [SerializeField] private int width, height;
     
 
+
+    // Field for the input map
+    [SerializeField] private TextAsset mapPlan;
+    // Integer representation of the map, using a three digit integer
+    // Integer one represents walkable or otherwise
+    // Integer two represents if there is a unit on the tile, and what faction that unit is
+    // Integer three represents the index of the unit prefab in the unit array for the given faction
+    /*  Key is as follows
+        Digit 1                         Digit 2                     Digit 3
+        0 => Walkable Tile              0 => Empty Tile             0 => Unit in the 0 position
+        1 => Impassable Tile            1 => Player Unit            1 => Unit in the 1 position
+                                        2 => Enemy Unit             etc.
+                                        3 => NPC Unit
+    */
+    private int[,] intMap;
     
     /* This is a Dictionary that contains all of the tiles on the map, using a Vector2 as
     the key (NOTE: The Vector2 used as a key does not corresponed to the actual location of 
     the tile, as all of the tiles are shifted up and right by a half unit) */
     private Dictionary<Vector2, Tile> tiles;
-
-   
 
     /* 
     - GenerateGrid does so using nested for loops, generating tiles in columns, starting 
@@ -55,6 +68,7 @@ public class GridManager : MonoBehaviour
     public void GenerateGrid()
     {
         tiles = new Dictionary<Vector2, Tile>();
+        convertToArray();
 
         for(int x = 0; x < width; x++)
         {
@@ -62,7 +76,21 @@ public class GridManager : MonoBehaviour
             {
                 Tile newTile = Instantiate(tilePrefab, new Vector3(x + 0.5f, y + 0.5f, 0), Quaternion.identity).GetComponent<Tile>();
                 newTile.gameObject.name = "Tile " + x + " " + y;
+                newTile.Init(x,y);
+                
+                if(intMap[x,y] / 100 == 1)
+                {
+                    newTile.SetWalkable(false);
+                }
+                else
+                {
+                    newTile.SetWalkable(true);
+                }
 
+                if((intMap[x,y] / 10) % 10 > 0)
+                {
+                    UnitManager.Instance.AddUnit(intMap[x,y] % 100, x, y);
+                }
                 tiles.Add(new Vector2(x, y), newTile);
             }
         }
@@ -76,6 +104,23 @@ public class GridManager : MonoBehaviour
         camera.transform.position = new Vector3(width/2, height/2, -10);
     }
 
+
+
+    private void convertToArray()
+    {
+        intMap = new int[width, height];
+        string map = mapPlan.ToString();
+        string[] firstPass = map.Split("\n", StringSplitOptions.None);
+        Array.Reverse(firstPass);
+        for(int i = 0; i < height; i++)
+        {
+            string[] row = firstPass[i].Split(" ", StringSplitOptions.None);
+            for(int j = 0; j < width; j++)
+            {
+                intMap[j,i] = Int32.Parse(row[j]);
+            }
+        }
+    }
 
 
     // Returns the tile associated with the input vector if it exists, otherwise returns null.

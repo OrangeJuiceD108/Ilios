@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6058208696051813077}
   - component: {fileID: 7562999875668700725}
-  - component: {fileID: 5581222274643662863}
+  - component: {fileID: 7943173576162010464}
   m_Layer: 0
   m_Name: Slime
   m_TagString: Untagged
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &5581222274643662863
+--- !u!114 &7943173576162010464
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,9 +94,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1507993220141774263}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbde354861378ff4583da7ed736302eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 3032c04597837f64184b9ff784406988, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   moveDistance: 3
-  maxHP: 3
+  maxHP: 6
   faction: 1
+  attackDistance: 1
+  unitName: Slime
+  currentHP: 0
+  currentAttackVisual: []

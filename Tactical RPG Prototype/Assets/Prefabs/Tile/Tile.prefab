@@ -211,6 +211,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   highlight: {fileID: 2758828452201353988}
   secondHighlight: {fileID: 6540340151371926191}
-  adjacencies: []
+  attackColor: {r: 0.8207547, g: 0.15021354, b: 0.26175672, a: 0.5882353}
+  moveColor: {r: 0.8627451, g: 0.5686275, b: 1, a: 0.5882353}
   walkable: 1
   moveCost: 1
+  adjacencies: []

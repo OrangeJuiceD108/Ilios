@@ -38,6 +38,14 @@ public class GameManager : MonoBehaviour
             case GameState.SpawnUnits:
                 UnitManager.Instance.GenerateUnits();
                 break;
+            case GameState.AllyTurn:
+                break;
+            case GameState.EnemyMoveTurn:
+                break;
+            case GameState.PlayerTurn:
+                break;
+            case GameState.EnemyAttackTurn:
+                break;
         }
     }
 }
@@ -49,4 +57,8 @@ public enum GameState
 {
     GenerateGrid = 1,
     SpawnUnits = 2,
+    AllyTurn = 3,
+    EnemyMoveTurn = 4,
+    PlayerTurn = 5,
+    EnemyAttackTurn = 6,
 }

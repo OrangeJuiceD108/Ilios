@@ -1,13 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
-public class Tile : MonoBehaviour
+public class Tile : PathfinderNode
 {
     // Highlights
     [Header("Highlights")]
     public SpriteRenderer highlight;
     public SpriteRenderer secondHighlight;
+
+    //Highlight colors
+    public Color attackColor;
+    public Color moveColor;
+
+    // Stores the location of the tile
+    // Vector2 location;
 
     // Unit occupying the tile
     private Unit unit;
@@ -15,12 +23,9 @@ public class Tile : MonoBehaviour
     // Tile Attributes
     [Header("Tile Attributes")]
     [SerializeField] private bool walkable;
+
     // Move penalty is the multiplier for the amount of movement required to enter that space (i.e., if the move penalty is 2, it takes double the movement to enter this space)
     [SerializeField] private int moveCost;
-
-    // Tiles adjacent to this tile
-    [SerializeField] private List<Tile> adjacencies;
-
 
 
     // The following functions are for mouse events
@@ -39,6 +44,14 @@ public class Tile : MonoBehaviour
         highlight.enabled = false;
     }
 
+    void OnMouseOver()
+    {
+        if(Input.GetMouseButtonDown(1))
+        {
+            Debug.Log(this);
+        }
+    }
+
     /* 
     Checks to see if a unit is selected
     - If a unit isn't selected, selects the unit on the current tile [need to make this check if the character ]
@@ -50,11 +63,10 @@ public class Tile : MonoBehaviour
         {
             if((unit == null || unit == currUnit) && currUnit.WithinMoveRange(this))
             {
-                UnitManager.Instance.GetSelectedUnit().DeleteMoveRadius();
                 UnitManager.Instance.UpdatePosition(currUnit, this);
                 UnitManager.Instance.DeselectUnit();
             }
-            else if(unit.OpposingFaction(currUnit.GetFaction()))
+            else if(unit != null && unit.OpposingFaction(currUnit.GetFaction()))
             {
                 int curHP = unit.TakeDamage(3);
                 if(curHP <=0)
@@ -74,6 +86,102 @@ public class Tile : MonoBehaviour
 
 
 
+    // Changes the color of the highlight
+    public void ChangeHighlightColor(Color color)
+    {
+        secondHighlight.material.color = color;
+        //Debug.Log(color);
+    }
+
+
+    // A* Search Algorithm
+    public List<Tile> FindPath(Tile target)
+    {
+        this.SetCosts(0,0);
+        List<Tile> openList = new List<Tile>();
+        List<Tile> closedList = new List<Tile>();
+
+        openList.Add(this);
+
+        while(openList.Count != 0)
+        {
+            Tile currentTile = FindLowestF(openList);
+            openList.Remove(currentTile);
+            closedList.Add(currentTile);
+
+            if(currentTile == target)
+            {   
+                foreach(Tile i in closedList)
+                {
+                    i.Reset();
+                }
+                foreach(Tile i in openList)
+                {
+                    i.Reset();
+                }
+                return BackTrack(currentTile);
+            }
+
+            foreach(Tile i in currentTile)
+            {
+                if(i.isWalkable())
+                {
+                    if(closedList.Contains(i))
+                    {
+                        continue;
+                    }
+                    if(i.GetF() == -1 || i.GetG() > currentTile.GetG()+1)
+                    {
+                        i.SetCosts(currentTile.GetG() + 1, Math.Abs((int)i.GetLocation().x - (int)target.GetLocation().x) + Math.Abs((int)i.GetLocation().y - (int)target.GetLocation().y));
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    
+                    openList.Add(i);
+                }
+            }
+        }
+        return null;
+    }
+    private Tile FindLowestF(List<Tile> list)
+    {
+        Tile tile = list[0];
+        foreach(Tile i in list)
+        {
+            if(tile != i && (tile.GetF() > i.GetF() || (tile.GetF() == i.GetF() && tile.GetH() > i.GetH())))
+            {
+                tile = i;
+            }
+        }
+        return tile;
+    }
+    private List<Tile> BackTrack(Tile destination)
+    {
+        List<Tile> track = new List<Tile>();
+        track.Add(destination);
+        Tile currentTile = destination;
+        while(currentTile.GetG() != 0)
+        {
+            currentTile = FindNextLowestG(currentTile);
+            track.Add(currentTile);
+        }
+        track.Reverse();
+        return track;
+    }
+    private Tile FindNextLowestG(Tile tile)
+    {
+        foreach(Tile i in tile)
+        {
+            if(i.GetG() < tile.GetG())
+            {
+                return i;
+            }
+        }
+        return null;
+    }
+
     // The following functions are for messing with the unit contained on the tile, they do what they say in their names lol
 
     public Unit GetUnit()
@@ -91,40 +199,15 @@ public class Tile : MonoBehaviour
         unit = null;
     }
 
-
-
     // Getter method for the walkable parameter
     public bool isWalkable()
     {
         return walkable;
     }
 
-    // The following functions have to do with adjacencies
-    /*
-    GenerateAdjacencies creates a list of adjacencies by using the "GetTile" method four times,
-    once in each cardinal direction, and then it uses a while loop to delete all of the null values
-    in the list of adjacencies, creating a list that only contains adjacent tiles
-    */
-    public void GenerateAdjacencies(int x, int y)
+    // Setter method for the walkable parameter, mostly used during initialization
+    public void SetWalkable(bool walk)
     {
-        adjacencies = new List<Tile>();
-
-        adjacencies.Add(GridManager.Instance.GetTile(new Vector2(x+1,y)));
-        adjacencies.Add(GridManager.Instance.GetTile(new Vector2(x,y+1)));
-        adjacencies.Add(GridManager.Instance.GetTile(new Vector2((x - 1),y)));
-        adjacencies.Add(GridManager.Instance.GetTile(new Vector2(x,(y - 1))));
-        while(adjacencies.Contains(null))
-        {
-            adjacencies.Remove(null);
-        }
-    }
-
-    /*
-    GetEnumerator returns an enumerator of the list of tile adjacencies, allowing tiles to be used
-    in foreach loops without grabbing the list within the tile directly
-    */
-    public List<Tile>.Enumerator GetEnumerator()
-    {
-        return adjacencies.GetEnumerator();
+        walkable = walk;
     }
 }

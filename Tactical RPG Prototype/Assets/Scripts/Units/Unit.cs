@@ -2,24 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Unit : MonoBehaviour
+public abstract class Unit : MonoBehaviour
 {
     [Header("Unit Attributes")]
-    [SerializeField] private int moveDistance;
-    [SerializeField] private int maxHP;
-    [SerializeField] private Faction faction;
+    [SerializeField] protected int moveDistance;
+    [SerializeField] protected int maxHP;
+    [SerializeField] protected Faction faction;
+    [SerializeField] protected int attackDistance;
+    [SerializeField] protected string unitName;
     
 
-    [SerializeField] private int currentHP;
+    [SerializeField] protected int currentHP;
     
-    private Tile currentTile;
+    protected Tile currentTile;
 
     // List containing all of the tiles that the unit can move to
-    private List<Tile> currentMoveRadius = new List<Tile>();
+    protected List<Tile> currentMoveRadius = new List<Tile>();
 
     public void Awake()
     {
         currentHP = maxHP;
+    }
+
+    public void Init()
+    {
+        this.gameObject.name = unitName;
     }
 
     // Gets the tile that the Unit resides on
@@ -77,9 +84,8 @@ public class Unit : MonoBehaviour
 
     // Recursive pair of functions that generates all of tiles that the unit can move to
     // Probably need to edit this function later so that it doesn't generate a highlight, and make a different function for generating highlights
-    public void GenerateMoveRadius()
+    public virtual void GenerateMoveRadius()
     {
-        currentTile.secondHighlight.enabled = true;
         currentMoveRadius.Add(currentTile);
         foreach(Tile i in currentTile)
         {
@@ -89,9 +95,8 @@ public class Unit : MonoBehaviour
             }
         }
     }
-    public void GenerateMoveRadius(Tile tile, int movesLeft)
+    protected virtual void GenerateMoveRadius(Tile tile, int movesLeft)
     {
-        tile.secondHighlight.enabled = true;
         currentMoveRadius.Add(tile);
         foreach (Tile i in tile)
         {
@@ -103,7 +108,7 @@ public class Unit : MonoBehaviour
     }
 
     // Gets ride of the move radius and deletes the highlights
-    public void DeleteMoveRadius()
+    public virtual void DeleteMoveRadius()
     {
         currentMoveRadius.ForEach(delegate(Tile tile)
         {
@@ -146,5 +151,6 @@ public class Unit : MonoBehaviour
         Player = 1,
         Enemy = 2,
         NPC = 3,
+        PlayerOrNPC = 4,
     }
 }
