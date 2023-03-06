@@ -8,7 +8,7 @@ public abstract class PathfinderNode : MonoBehaviour
     // G is the distance to get to this tile from the start node
     // H is the manhattan distance from this tile to the target node, ignoring obstacles
     // F is the total of G and H
-    protected int fCost, gCost, hCost;
+    [SerializeField] protected int fCost, gCost, hCost;
 
     // Stores the location of the tile
     protected Vector2 location;

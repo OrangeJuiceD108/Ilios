@@ -1,9 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    // List of buttons so I can mess with them
+    [SerializeField] List<Button> buttonList = new List<Button>();
+
     // This hunk of code is what makes this a singleton
     public static GameManager Instance;
     void Awake()
@@ -15,12 +19,30 @@ public class GameManager : MonoBehaviour
     // Stores the gameState lol
     public GameState gameState;
 
-    
+
 
     // Sets the gameState to generate grid so that the game can begin
     void Start()
     {
         ChangeState(GameState.GenerateGrid);
+    }
+
+
+
+    // Activates & Deactivates the Buttons
+    public void ActivateButtons()
+    {
+        buttonList.ForEach(delegate(Button button)
+        {
+            button.interactable = true;
+        });
+    }
+    public void DeactivateButtons()
+    {
+        buttonList.ForEach(delegate(Button button)
+        {
+            button.interactable = false;
+        });
     }
 
 
@@ -37,14 +59,25 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.SpawnUnits:
                 UnitManager.Instance.GenerateUnits();
+                ChangeState(GameState.FirstPlayerTurn);
                 break;
             case GameState.AllyTurn:
+                // Following line is temp logic
+                ChangeState(GameState.EnemyMoveTurn);
                 break;
             case GameState.EnemyMoveTurn:
+                UnitManager.Instance.EnemyMoveTurn();
+                ChangeState(GameState.PlayerTurn);
                 break;
             case GameState.PlayerTurn:
+                UnitManager.Instance.StartPlayerTurn();
                 break;
             case GameState.EnemyAttackTurn:
+                // Following line is temp logic
+                ChangeState(GameState.AllyTurn);
+                break;
+            case GameState.FirstPlayerTurn:
+                UnitManager.Instance.StartPlayerTurn();
                 break;
         }
     }
@@ -61,4 +94,5 @@ public enum GameState
     EnemyMoveTurn = 4,
     PlayerTurn = 5,
     EnemyAttackTurn = 6,
+    FirstPlayerTurn = 7,
 }

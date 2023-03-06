@@ -56,15 +56,13 @@ public class UnitManager : MonoBehaviour
             else
             {
                 code /= 10;
-                Debug.Log(code);
                 newUnit = Instantiate(alliedUnitPrefabs[(code % 10)]).GetComponent<Unit>();
                 alliedUnits.Add(newUnit);
             }
             code /= 10;
-            newUnit.Init();
             Tile startTile = GridManager.Instance.GetTile(new Vector2(code / 100, code % 100));
-
             UpdatePosition(newUnit, startTile);
+            newUnit.Init();
         }
     }
 
@@ -159,9 +157,50 @@ public class UnitManager : MonoBehaviour
             checkedTiles.Add(item);
             item.GetAdjacencies().ForEach(delegate(Tile i)
             {
-                queue.Enqueue(i);
+                if(!(queue.Contains(i) || checkedTiles.Contains(i)))
+                {    
+                    queue.Enqueue(i);
+                }
             });
         }
         return null;
+    }
+
+    public void EnemyMoveTurn()
+    {
+        foreach(Unit i in enemyUnits)
+        {
+            i.ChangeUnitState(Unit.UnitState.Move);
+        }
+    }
+
+    public void StartPlayerTurn()
+    {
+        foreach(Unit i in playerUnits)
+        {
+            i.ChangeUnitState(Unit.UnitState.Move);
+        }
+    }
+    public void TryEndPlayerTurn()
+    {
+        bool done = true;
+        foreach(Unit i in playerUnits)
+        {
+            if(i.GetUnitState() != Unit.UnitState.Exhausted)
+            {
+                done = false;
+            }
+        }
+        if(done)
+        {
+            if(GameManager.Instance.gameState == GameState.FirstPlayerTurn)
+            {
+                GameManager.Instance.ChangeState(GameState.AllyTurn);
+            }
+            else if(GameManager.Instance.gameState == GameState.PlayerTurn)
+            {
+                GameManager.Instance.ChangeState(GameState.EnemyAttackTurn);
+            }
+        }
     }
 }

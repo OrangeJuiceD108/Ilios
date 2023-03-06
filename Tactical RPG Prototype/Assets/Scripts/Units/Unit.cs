@@ -10,14 +10,18 @@ public abstract class Unit : MonoBehaviour
     [SerializeField] protected Faction faction;
     [SerializeField] protected int attackDistance;
     [SerializeField] protected string unitName;
-    
 
     [SerializeField] protected int currentHP;
+    [SerializeField] protected UnitState unitState = UnitState.Exhausted;
     
     protected Tile currentTile;
+    protected Tile originalPosition;
 
     // List containing all of the tiles that the unit can move to
     protected List<Tile> currentMoveRadius = new List<Tile>();
+
+    // List containing all of the tiles that the unit can attack
+    protected List<Tile> currentAttackRadius = new List<Tile>();
 
     public void Awake()
     {
@@ -27,6 +31,7 @@ public abstract class Unit : MonoBehaviour
     public void Init()
     {
         this.gameObject.name = unitName;
+        originalPosition = currentTile;
     }
 
     // Gets the tile that the Unit resides on
@@ -55,10 +60,24 @@ public abstract class Unit : MonoBehaviour
         return true;
     }
 
+    public void UpdateOrigPosition()
+    {
+        originalPosition = currentTile;
+    }
+    public void ReturnPosition()
+    {
+        UnitManager.Instance.UpdatePosition(this, originalPosition);
+    }
+
     // Getter method for the faction variable
     public Faction GetFaction()
     {
         return faction;
+    }
+
+    public int GetAttackDistance()
+    {
+        return attackDistance;
     }
 
     // Checks if the faction given is an enemy of the faction of this unit
@@ -82,6 +101,14 @@ public abstract class Unit : MonoBehaviour
         }
     }
 
+    // Unit state function for changing the state, all units need it but they all also implement it differently so this is abstract
+    public abstract void ChangeUnitState(UnitState state);
+
+    public UnitState GetUnitState()
+    {
+        return unitState;
+    }
+
     // Recursive pair of functions that generates all of tiles that the unit can move to
     // Probably need to edit this function later so that it doesn't generate a highlight, and make a different function for generating highlights
     public virtual void GenerateMoveRadius()
@@ -89,7 +116,7 @@ public abstract class Unit : MonoBehaviour
         currentMoveRadius.Add(currentTile);
         foreach(Tile i in currentTile)
         {
-            if(i.isWalkable())
+            if(i.isWalkable() && ((i.GetUnit() != null && !i.GetUnit().OpposingFaction(faction)) || i.GetUnit() == null))
             {
                 GenerateMoveRadius(i, moveDistance-1);
             }
@@ -100,9 +127,12 @@ public abstract class Unit : MonoBehaviour
         currentMoveRadius.Add(tile);
         foreach (Tile i in tile)
         {
-            if(!currentMoveRadius.Contains(i) && movesLeft > 0 && i.isWalkable())
+            if(!currentMoveRadius.Contains(i))
             {
-                GenerateMoveRadius(i, movesLeft-1);
+                if(movesLeft > 0 && i.isWalkable() && ((i.GetUnit() != null && !i.GetUnit().OpposingFaction(faction)) || i.GetUnit() == null))
+                {
+                    GenerateMoveRadius(i, movesLeft-1);
+                }
             }
         }
     }
@@ -138,11 +168,24 @@ public abstract class Unit : MonoBehaviour
         return currentHP;
     }
 
+    public abstract void GenerateAttackRadius(Tile tile, int distLeft);
+    public abstract void DeleteAttackRadius();
+
+    public bool WithinAttackRange(Tile tile)
+    {
+        return currentAttackRadius.Contains(tile);
+    }
+
     // Removes unit from tile that it is on and then destroys it
     public void Die()
     {
         currentTile.RemoveUnit();
         Destroy(gameObject);
+    }
+
+    public override string ToString()
+    {
+        return name;
     }
 
     // Enum for the faction of the unit
@@ -152,5 +195,12 @@ public abstract class Unit : MonoBehaviour
         Enemy = 2,
         NPC = 3,
         PlayerOrNPC = 4,
+    }
+
+    public enum UnitState
+    {
+        Move = 1,
+        Action = 2,
+        Exhausted = 3,
     }
 }

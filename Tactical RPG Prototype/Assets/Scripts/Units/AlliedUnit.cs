@@ -4,15 +4,29 @@ using UnityEngine;
 
 public class AlliedUnit : Unit
 {
-    // Start is called before the first frame update
-    void Start()
+    public override void GenerateAttackRadius(Tile tile, int distLeft)
     {
-        
+        // Generally pointless function for now.
+    }
+    public override void DeleteAttackRadius()
+    {
+        // Generally pointless function for now.
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void ChangeUnitState(UnitState state)
     {
-        
+        unitState = state;
+        switch (state)
+        {
+            case UnitState.Move:
+                GenerateMoveRadius();
+                ChangeUnitState(UnitState.Action);
+                break;
+            case UnitState.Action:
+                ChangeUnitState(UnitState.Exhausted);
+                break;
+            case UnitState.Exhausted:
+                break;
+        }
     }
 }

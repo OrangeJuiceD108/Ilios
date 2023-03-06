@@ -48,7 +48,18 @@ public class Tile : PathfinderNode
     {
         if(Input.GetMouseButtonDown(1))
         {
-            Debug.Log(this);
+            Unit selectedUnit = UnitManager.Instance.GetSelectedUnit();
+            if(selectedUnit.GetUnitState() == Unit.UnitState.Move)
+            {
+                UnitManager.Instance.DeselectUnit();
+            }
+            if(selectedUnit.GetUnitState() == Unit.UnitState.Action)
+            {
+                selectedUnit.ChangeUnitState(Unit.UnitState.Move);
+                selectedUnit.ReturnPosition();
+                selectedUnit.GenerateMoveRadius();
+                GameManager.Instance.DeactivateButtons();
+            }
         }
     }
 
@@ -61,23 +72,25 @@ public class Tile : PathfinderNode
         Unit currUnit;
         if(UnitManager.Instance.TryGetUnit(out currUnit))
         {
-            if((unit == null || unit == currUnit) && currUnit.WithinMoveRange(this))
+            if((unit == null || unit == currUnit) && currUnit.WithinMoveRange(this) && currUnit.GetUnitState() == Unit.UnitState.Move)
             {
                 UnitManager.Instance.UpdatePosition(currUnit, this);
-                UnitManager.Instance.DeselectUnit();
+                currUnit.DeleteMoveRadius();
+                currUnit.ChangeUnitState(Unit.UnitState.Action);
             }
-            else if(unit != null && unit.OpposingFaction(currUnit.GetFaction()))
+            else if(currUnit.GetUnitState() == Unit.UnitState.Action && currUnit.WithinAttackRange(this) && unit != null && unit.OpposingFaction(currUnit.GetFaction()))
             {
                 int curHP = unit.TakeDamage(3);
                 if(curHP <=0)
                 {
                     unit.Die();
                 }
+                unit.DeleteAttackRadius();
             }
         }
         else
         {
-            if(unit != null)
+            if(unit != null && unit.GetUnitState() == Unit.UnitState.Move)
             {
                 UnitManager.Instance.SelectUnit(unit);
             }
@@ -111,15 +124,7 @@ public class Tile : PathfinderNode
 
             if(currentTile == target)
             {   
-                foreach(Tile i in closedList)
-                {
-                    i.Reset();
-                }
-                foreach(Tile i in openList)
-                {
-                    i.Reset();
-                }
-                return BackTrack(currentTile);
+                return BackTrack(currentTile, openList, closedList);
             }
 
             foreach(Tile i in currentTile)
@@ -157,7 +162,7 @@ public class Tile : PathfinderNode
         }
         return tile;
     }
-    private List<Tile> BackTrack(Tile destination)
+    private List<Tile> BackTrack(Tile destination, List<Tile> openList, List<Tile> closedList)
     {
         List<Tile> track = new List<Tile>();
         track.Add(destination);
@@ -168,18 +173,31 @@ public class Tile : PathfinderNode
             track.Add(currentTile);
         }
         track.Reverse();
+        foreach(Tile i in closedList)
+        {
+            i.Reset();
+        }
+        foreach(Tile i in openList)
+        {
+            i.Reset();
+        } 
         return track;
     }
     private Tile FindNextLowestG(Tile tile)
     {
+        Tile someTile = tile;
         foreach(Tile i in tile)
         {
-            if(i.GetG() < tile.GetG())
+            if(i.GetG() < tile.GetG() && i.GetG() > -1)
             {
-                return i;
+                someTile = i;
             }
+        }       
+        if(tile == someTile)
+        {
+            return null;
         }
-        return null;
+        return someTile;
     }
 
     // The following functions are for messing with the unit contained on the tile, they do what they say in their names lol
@@ -209,5 +227,10 @@ public class Tile : PathfinderNode
     public void SetWalkable(bool walk)
     {
         walkable = walk;
+    }
+
+    public override string ToString()
+    {
+        return GetLocation().ToString();
     }
 }

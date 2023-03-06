@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class PlayerUnit : Unit
 {
-    // List containing all of the tiles that the unit can attack
+    // List containing the highlighted tiles showing the tiles that the unit can attack beyond its move radius
     [SerializeField] private List<Tile> currentAttackVisual = new List<Tile>();
 
+    
 
     // Recursive pair of functions that generates all of tiles that the unit can move to
     public override void GenerateMoveRadius()
@@ -16,7 +17,7 @@ public class PlayerUnit : Unit
         currentMoveRadius.Add(currentTile);
         foreach(Tile i in currentTile)
         {
-            if(i.isWalkable())
+            if(i.isWalkable() && ((i.GetUnit() != null && !i.GetUnit().OpposingFaction(faction)) || i.GetUnit() == null))
             {
                 GenerateMoveRadius(i, moveDistance-1);
             }
@@ -35,7 +36,7 @@ public class PlayerUnit : Unit
         {
             if(!currentMoveRadius.Contains(i))
             {
-                if(movesLeft > 0 && i.isWalkable())
+                if(movesLeft > 0 && i.isWalkable() && ((i.GetUnit() != null && !i.GetUnit().OpposingFaction(faction)) || i.GetUnit() == null))
                 {
                     GenerateMoveRadius(i, movesLeft-1);
                 }
@@ -78,5 +79,46 @@ public class PlayerUnit : Unit
             tile.secondHighlight.enabled = false;
         });
         currentAttackVisual.Clear();
+    }
+
+    public override void GenerateAttackRadius(Tile tile, int distLeft)
+    {
+        if(tile != currentTile)
+        {
+            tile.ChangeHighlightColor(currentTile.attackColor);
+            tile.secondHighlight.enabled = true;
+            currentAttackRadius.Add(tile);
+        }
+        foreach(Tile i in tile)
+        {
+            if(i != currentTile && !currentAttackRadius.Contains(i) && distLeft > 0)
+            {
+                GenerateAttackRadius(i, distLeft-1);
+            }
+        }
+    }
+    public override void DeleteAttackRadius()
+    {
+        currentAttackRadius.ForEach(delegate(Tile tile)
+        {
+            tile.secondHighlight.enabled = false;
+        });
+        currentAttackRadius.Clear();
+    }
+
+    public override void ChangeUnitState(UnitState state)
+    {
+        unitState = state;
+        switch (state)
+        {
+            case UnitState.Move:
+                break;
+            case UnitState.Action:
+                GameManager.Instance.ActivateButtons();
+                break;
+            case UnitState.Exhausted:
+                UpdateOrigPosition();
+                break;
+        }
     }
 }
