@@ -98,8 +98,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveDistance: 3
-  maxHP: 6
+  maxHP: 2
   faction: 2
   attackDistance: 1
   unitName: Frog
   currentHP: 0
+  unitState: 5
+  currentAttackRadius: []

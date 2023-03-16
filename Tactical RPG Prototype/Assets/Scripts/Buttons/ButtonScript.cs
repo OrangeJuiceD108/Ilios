@@ -8,11 +8,15 @@ public class ButtonScript : MonoBehaviour
     {
         Debug.Log("ATTACK");
         Unit selectedUnit = UnitManager.Instance.GetSelectedUnit();
-        selectedUnit.GenerateAttackRadius(selectedUnit.GetTile(), selectedUnit.GetAttackDistance());
+        selectedUnit.ChangeUnitState(Unit.UnitState.Attack);
+        GameManager.Instance.DeactivateButtons();
     }
     public void Push()
     {
         Debug.Log("PUSH");
+        Unit selectedUnit = UnitManager.Instance.GetSelectedUnit();
+        selectedUnit.ChangeUnitState(Unit.UnitState.Push);
+        GameManager.Instance.DeactivateButtons();
     }
     public void Wait()
     {

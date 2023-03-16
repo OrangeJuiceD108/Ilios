@@ -55,6 +55,10 @@ public class Tile : PathfinderNode
             }
             if(selectedUnit.GetUnitState() == Unit.UnitState.Action)
             {
+                if(!selectedUnit.AttackRadiusIsEmpty())
+                {
+                    selectedUnit.DeleteAttackRadius();
+                }
                 selectedUnit.ChangeUnitState(Unit.UnitState.Move);
                 selectedUnit.ReturnPosition();
                 selectedUnit.GenerateMoveRadius();
@@ -78,14 +82,18 @@ public class Tile : PathfinderNode
                 currUnit.DeleteMoveRadius();
                 currUnit.ChangeUnitState(Unit.UnitState.Action);
             }
-            else if(currUnit.GetUnitState() == Unit.UnitState.Action && currUnit.WithinAttackRange(this) && unit != null && unit.OpposingFaction(currUnit.GetFaction()))
+            else if(currUnit.GetUnitState() == Unit.UnitState.Attack && currUnit.WithinAttackRange(this) && unit != null && unit.OpposingFaction(currUnit.GetFaction()))
             {
-                int curHP = unit.TakeDamage(3);
+                Debug.Log("attack");
+                int curHP = unit.TakeDamage(1);
                 if(curHP <=0)
                 {
                     unit.Die();
                 }
-                unit.DeleteAttackRadius();
+                currUnit.DeleteAttackRadius();
+                currUnit.ChangeUnitState(Unit.UnitState.Exhausted);
+                UnitManager.Instance.DeselectUnit();
+                UnitManager.Instance.TryEndPlayerTurn();
             }
         }
         else
@@ -108,7 +116,7 @@ public class Tile : PathfinderNode
 
 
     // A* Search Algorithm
-    public List<Tile> FindPath(Tile target)
+    public List<Tile> FindPath(Tile target, Unit.Faction faction)
     {
         this.SetCosts(0,0);
         List<Tile> openList = new List<Tile>();
@@ -129,7 +137,7 @@ public class Tile : PathfinderNode
 
             foreach(Tile i in currentTile)
             {
-                if(i.isWalkable())
+                if(i.isWalkable(faction) || i == target)
                 {
                     if(closedList.Contains(i))
                     {
@@ -223,6 +231,15 @@ public class Tile : PathfinderNode
         return walkable;
     }
 
+    public bool isWalkable(Unit.Faction faction)
+    {
+        if(unit != null)
+        {
+            return walkable && !unit.OpposingFaction(faction);
+        }
+        return walkable;
+    }
+    
     // Setter method for the walkable parameter, mostly used during initialization
     public void SetWalkable(bool walk)
     {

@@ -17,7 +17,7 @@ public class PlayerUnit : Unit
         currentMoveRadius.Add(currentTile);
         foreach(Tile i in currentTile)
         {
-            if(i.isWalkable() && ((i.GetUnit() != null && !i.GetUnit().OpposingFaction(faction)) || i.GetUnit() == null))
+            if(i.isWalkable(faction))
             {
                 GenerateMoveRadius(i, moveDistance-1);
             }
@@ -36,7 +36,7 @@ public class PlayerUnit : Unit
         {
             if(!currentMoveRadius.Contains(i))
             {
-                if(movesLeft > 0 && i.isWalkable() && ((i.GetUnit() != null && !i.GetUnit().OpposingFaction(faction)) || i.GetUnit() == null))
+                if(movesLeft > 0 && i.isWalkable(faction))
                 {
                     GenerateMoveRadius(i, movesLeft-1);
                 }
@@ -115,6 +115,12 @@ public class PlayerUnit : Unit
                 break;
             case UnitState.Action:
                 GameManager.Instance.ActivateButtons();
+                break;
+            case UnitState.Attack:
+                GenerateAttackRadius(GetTile(), GetAttackDistance());
+                break;
+            case UnitState.Push:
+                GenerateAttackRadius(GetTile(), GetAttackDistance());
                 break;
             case UnitState.Exhausted:
                 UpdateOrigPosition();

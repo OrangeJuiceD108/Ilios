@@ -21,7 +21,7 @@ public abstract class Unit : MonoBehaviour
     protected List<Tile> currentMoveRadius = new List<Tile>();
 
     // List containing all of the tiles that the unit can attack
-    protected List<Tile> currentAttackRadius = new List<Tile>();
+    [SerializeField] protected List<Tile> currentAttackRadius = new List<Tile>();
 
     public void Awake()
     {
@@ -116,7 +116,7 @@ public abstract class Unit : MonoBehaviour
         currentMoveRadius.Add(currentTile);
         foreach(Tile i in currentTile)
         {
-            if(i.isWalkable() && ((i.GetUnit() != null && !i.GetUnit().OpposingFaction(faction)) || i.GetUnit() == null))
+            if(i.isWalkable(faction))
             {
                 GenerateMoveRadius(i, moveDistance-1);
             }
@@ -129,7 +129,7 @@ public abstract class Unit : MonoBehaviour
         {
             if(!currentMoveRadius.Contains(i))
             {
-                if(movesLeft > 0 && i.isWalkable() && ((i.GetUnit() != null && !i.GetUnit().OpposingFaction(faction)) || i.GetUnit() == null))
+                if(movesLeft > 0 && i.isWalkable(faction))
                 {
                     GenerateMoveRadius(i, movesLeft-1);
                 }
@@ -176,10 +176,16 @@ public abstract class Unit : MonoBehaviour
         return currentAttackRadius.Contains(tile);
     }
 
+    public bool AttackRadiusIsEmpty()
+    {
+        return currentAttackRadius.Count == 0;
+    }
+
     // Removes unit from tile that it is on and then destroys it
     public void Die()
     {
         currentTile.RemoveUnit();
+        UnitManager.Instance.DeleteUnit(this);
         Destroy(gameObject);
     }
 
@@ -201,6 +207,8 @@ public abstract class Unit : MonoBehaviour
     {
         Move = 1,
         Action = 2,
-        Exhausted = 3,
+        Attack = 3,
+        Push = 4,
+        Exhausted = 5,
     }
 }

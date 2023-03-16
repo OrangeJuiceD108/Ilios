@@ -72,12 +72,28 @@ public class UnitManager : MonoBehaviour
         plannedUnits.Add(newCode);
     }
 
+    public void DeleteUnit(Unit unit)
+    {
+        Unit.Faction faction = unit.GetFaction();
+        if(faction == Unit.Faction.Enemy)
+        {
+            enemyUnits.Remove(unit);
+        }
+        else if (faction == Unit.Faction.Player)
+        {
+            playerUnits.Remove(unit);
+        }
+        else
+        {
+            alliedUnits.Remove(unit);
+        }
+    }
+
     // For moving and placing units
     public void UpdatePosition(Unit unit, Tile newLocation)
     {
         if(unit.HasTile())
         {
-            
             unit.GetTile().RemoveUnit();
         }
         newLocation.SetUnit(unit);
@@ -157,7 +173,7 @@ public class UnitManager : MonoBehaviour
             checkedTiles.Add(item);
             item.GetAdjacencies().ForEach(delegate(Tile i)
             {
-                if(!(queue.Contains(i) || checkedTiles.Contains(i)))
+                if(i.isWalkable() && (!(queue.Contains(i) || checkedTiles.Contains(i))))
                 {    
                     queue.Enqueue(i);
                 }
@@ -183,6 +199,16 @@ public class UnitManager : MonoBehaviour
     }
     public void TryEndPlayerTurn()
     {
+        if(enemyUnits.Count == 0)
+        {
+            GameManager.Instance.ChangeState(GameState.Victory);
+        }
+        if(playerUnits.Count == 0)
+        {
+            GameManager.Instance.ChangeState(GameState.Defeat);
+            return;
+        }
+
         bool done = true;
         foreach(Unit i in playerUnits)
         {
@@ -202,5 +228,13 @@ public class UnitManager : MonoBehaviour
                 GameManager.Instance.ChangeState(GameState.EnemyAttackTurn);
             }
         }
+    }
+
+    public void ExhaustAll()
+    {
+        playerUnits.ForEach(delegate(Unit i)
+        {
+            i.ChangeUnitState(Unit.UnitState.Exhausted);
+        });
     }
 }

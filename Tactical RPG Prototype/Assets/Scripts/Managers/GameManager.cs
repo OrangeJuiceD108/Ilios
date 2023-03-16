@@ -8,6 +8,9 @@ public class GameManager : MonoBehaviour
     // List of buttons so I can mess with them
     [SerializeField] List<Button> buttonList = new List<Button>();
 
+    [SerializeField] GameObject victory;
+    [SerializeField] GameObject defeat;
+
     // This hunk of code is what makes this a singleton
     public static GameManager Instance;
     void Awake()
@@ -79,6 +82,13 @@ public class GameManager : MonoBehaviour
             case GameState.FirstPlayerTurn:
                 UnitManager.Instance.StartPlayerTurn();
                 break;
+            case GameState.Victory:
+                UnitManager.Instance.ExhaustAll();
+                victory.SetActive(true);
+                break;
+            case GameState.Defeat:
+                defeat.SetActive(true);
+                break;
         }
     }
 }
@@ -95,4 +105,6 @@ public enum GameState
     PlayerTurn = 5,
     EnemyAttackTurn = 6,
     FirstPlayerTurn = 7,
+    Victory = 8,
+    Defeat = 9,
 }
