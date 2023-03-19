@@ -20,7 +20,7 @@ public class UnitManager : MonoBehaviour
     private Unit selectedUnit;
 
     // Lists of each type of unit
-    private List<Unit> playerUnits = new List<Unit>();
+    [SerializeField] private List<Unit> playerUnits = new List<Unit>();
     private List<Unit> enemyUnits = new List<Unit>();
     private List<Unit> alliedUnits = new List<Unit>();
 
@@ -106,12 +106,13 @@ public class UnitManager : MonoBehaviour
     {
         selectedUnit = unit;
         selectedUnit.GenerateMoveRadius();
+        MenuManager.Instance.SetSelectedUnitUI(selectedUnit);
         // selectedUnit.GenerateAttackRadius();
     }
     public void DeselectUnit()
     {
         selectedUnit.DeleteMoveRadius();
-        // selectedUnit.DeleteAttackRadius();
+        MenuManager.Instance.RemoveSelectedUnitUI();
         selectedUnit = null;
     }
 
@@ -190,6 +191,14 @@ public class UnitManager : MonoBehaviour
         }
     }
 
+    public void RunEnemyAttacks()
+    {
+        foreach(Unit i in enemyUnits)
+        {
+            i.ChangeUnitState(Unit.UnitState.Action);
+        }
+    }
+
     public void StartPlayerTurn()
     {
         foreach(Unit i in playerUnits)
@@ -228,6 +237,16 @@ public class UnitManager : MonoBehaviour
                 GameManager.Instance.ChangeState(GameState.EnemyAttackTurn);
             }
         }
+    }
+
+    public bool TryLoss()
+    {
+        if(playerUnits.Count == 0)
+        {
+            GameManager.Instance.ChangeState(GameState.Defeat);
+            return true;
+        }
+        return false;
     }
 
     public void ExhaustAll()

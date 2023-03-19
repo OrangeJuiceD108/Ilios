@@ -23,8 +23,27 @@ public class EnemyUnit : Unit
                 Unit nearestUnit = UnitManager.Instance.NearestUnit(Faction.PlayerOrNPC, currentTile.GetLocation());
                 List<Tile> path = currentTile.FindPath(nearestUnit.GetTile(), faction);
                 UnitManager.Instance.UpdatePosition(this, FindOpenSpace(path));
+                if(currentTile == path[path.Count - 2])
+                {
+                    Tile tile = path[path.Count - 1];
+                    currentAttackRadius.Add(tile);
+                    tile.enemyHighlight.enabled = true;
+                }
                 break;
             case UnitState.Action:
+                if(currentAttackRadius.Count == 0)
+                {return;}
+                Unit unit = currentAttackRadius[0].GetUnit();
+                if(unit != null)
+                {
+                    if(unit.TakeDamage(1) < 1)
+                    {
+                        unit.Die();
+                    }
+                }
+                currentAttackRadius[0].enemyHighlight.enabled = false;
+                currentAttackRadius.Clear();
+                ChangeUnitState(UnitState.Exhausted);
                 break;
             case UnitState.Exhausted:
                 

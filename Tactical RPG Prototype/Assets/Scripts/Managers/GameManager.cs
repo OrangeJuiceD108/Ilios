@@ -77,7 +77,11 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.EnemyAttackTurn:
                 // Following line is temp logic
-                ChangeState(GameState.AllyTurn);
+                UnitManager.Instance.RunEnemyAttacks();
+                if(!UnitManager.Instance.TryLoss())
+                {
+                    ChangeState(GameState.AllyTurn);
+                }
                 break;
             case GameState.FirstPlayerTurn:
                 UnitManager.Instance.StartPlayerTurn();

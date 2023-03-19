@@ -14,7 +14,7 @@ public abstract class Unit : MonoBehaviour
     [SerializeField] protected int currentHP;
     [SerializeField] protected UnitState unitState = UnitState.Exhausted;
     
-    protected Tile currentTile;
+    [SerializeField] protected Tile currentTile;
     protected Tile originalPosition;
 
     // List containing all of the tiles that the unit can move to
@@ -32,6 +32,21 @@ public abstract class Unit : MonoBehaviour
     {
         this.gameObject.name = unitName;
         originalPosition = currentTile;
+    }
+
+    public string GetName()
+    {
+        return unitName;
+    }
+
+    public int GetCurrentHP()
+    {
+        return currentHP;
+    }
+    
+    public int GetMaxHP()
+    {
+        return maxHP;
     }
 
     // Gets the tile that the Unit resides on

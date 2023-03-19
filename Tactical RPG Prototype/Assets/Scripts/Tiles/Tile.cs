@@ -9,6 +9,7 @@ public class Tile : PathfinderNode
     [Header("Highlights")]
     public SpriteRenderer highlight;
     public SpriteRenderer secondHighlight;
+    public SpriteRenderer enemyHighlight;
 
     //Highlight colors
     public Color attackColor;
@@ -37,11 +38,16 @@ public class Tile : PathfinderNode
     void OnMouseEnter()
     {
         highlight.enabled = true;
+        if(unit != null)
+        {
+            MenuManager.Instance.SetHighlightedUnitUI(unit);
+        }
     }
 
     void OnMouseExit()
     {
         highlight.enabled = false;
+        MenuManager.Instance.RemoveHighlightedUnitUI();
     }
 
     void OnMouseOver()
@@ -53,7 +59,7 @@ public class Tile : PathfinderNode
             {
                 UnitManager.Instance.DeselectUnit();
             }
-            if(selectedUnit.GetUnitState() == Unit.UnitState.Action)
+            if(selectedUnit.GetUnitState() == Unit.UnitState.Action || selectedUnit.GetUnitState() == Unit.UnitState.Push)
             {
                 if(!selectedUnit.AttackRadiusIsEmpty())
                 {
@@ -81,10 +87,10 @@ public class Tile : PathfinderNode
                 UnitManager.Instance.UpdatePosition(currUnit, this);
                 currUnit.DeleteMoveRadius();
                 currUnit.ChangeUnitState(Unit.UnitState.Action);
+                return;
             }
             else if(currUnit.GetUnitState() == Unit.UnitState.Attack && currUnit.WithinAttackRange(this) && unit != null && unit.OpposingFaction(currUnit.GetFaction()))
             {
-                Debug.Log("attack");
                 int curHP = unit.TakeDamage(1);
                 if(curHP <=0)
                 {
@@ -92,6 +98,17 @@ public class Tile : PathfinderNode
                 }
                 currUnit.DeleteAttackRadius();
                 currUnit.ChangeUnitState(Unit.UnitState.Exhausted);
+                UnitManager.Instance.DeselectUnit();
+                UnitManager.Instance.TryEndPlayerTurn();
+                return;
+            }
+            Tile moveTile;
+            if(currUnit.GetUnitState() == Unit.UnitState.Push && currUnit.WithinAttackRange(this) && CanBePushed(currUnit, out moveTile))
+            {
+                UnitManager.Instance.UpdatePosition(unit, moveTile);
+                currUnit.DeleteAttackRadius();
+                currUnit.ChangeUnitState(Unit.UnitState.Exhausted);
+                currUnit.UpdateOrigPosition();
                 UnitManager.Instance.DeselectUnit();
                 UnitManager.Instance.TryEndPlayerTurn();
             }
@@ -107,11 +124,36 @@ public class Tile : PathfinderNode
 
 
 
+    // Checks ifs a unit on the current tile can be pushed by the input unit
+    private bool CanBePushed(Unit givenUnit, out Tile moveTile)
+    {
+        moveTile = null;
+        if(unit == null)
+        {
+            return false;
+        }
+
+        Tile tile = givenUnit.GetTile();
+        Vector2 loc2 = tile.GetLocation();
+        float xDirection = location.x - loc2.x;
+        float yDirection = location.y - loc2.y;
+
+        Tile pushLoc = GridManager.Instance.GetTile(new Vector2(location.x + xDirection, location.y + yDirection));
+
+        if(pushLoc.isWalkable() && pushLoc.GetUnit() == null)
+        {
+            moveTile = pushLoc;
+            return true;
+        }
+        return false;
+    }
+
+
+
     // Changes the color of the highlight
     public void ChangeHighlightColor(Color color)
     {
         secondHighlight.material.color = color;
-        //Debug.Log(color);
     }
 
 

@@ -6,14 +6,12 @@ public class ButtonScript : MonoBehaviour
 {
     public void Attack()
     {
-        Debug.Log("ATTACK");
         Unit selectedUnit = UnitManager.Instance.GetSelectedUnit();
         selectedUnit.ChangeUnitState(Unit.UnitState.Attack);
         GameManager.Instance.DeactivateButtons();
     }
     public void Push()
     {
-        Debug.Log("PUSH");
         Unit selectedUnit = UnitManager.Instance.GetSelectedUnit();
         selectedUnit.ChangeUnitState(Unit.UnitState.Push);
         GameManager.Instance.DeactivateButtons();
