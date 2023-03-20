@@ -10,6 +10,7 @@ public class Tile : PathfinderNode
     public SpriteRenderer highlight;
     public SpriteRenderer secondHighlight;
     public SpriteRenderer enemyHighlight;
+    public SpriteRenderer goalHighlight;
 
     //Highlight colors
     public Color attackColor;
@@ -105,6 +106,19 @@ public class Tile : PathfinderNode
             Tile moveTile;
             if(currUnit.GetUnitState() == Unit.UnitState.Push && currUnit.WithinAttackRange(this) && CanBePushed(currUnit, out moveTile))
             {
+                // UnitManager.Instance.UpdatePosition(unit, moveTile);
+                if(!unit.AttackRadiusIsEmpty())
+                {
+                    Vector2 direction = new Vector2(moveTile.GetLocation().x - location.x, moveTile.GetLocation().y - location.y);
+                    Tile tile = unit.GetAttackRadiusAt(0);
+                    
+                    unit.RemoveFromAttackRadius(tile);
+                    Vector2 loc = tile.GetLocation() + direction;
+                    Debug.Log(tile.GetLocation());
+                    Debug.Log(direction);
+                    Debug.Log(loc);
+                    unit.AddToAttackRadius(GridManager.Instance.GetTile(loc));
+                }
                 UnitManager.Instance.UpdatePosition(unit, moveTile);
                 currUnit.DeleteAttackRadius();
                 currUnit.ChangeUnitState(Unit.UnitState.Exhausted);
@@ -138,7 +152,9 @@ public class Tile : PathfinderNode
         float xDirection = location.x - loc2.x;
         float yDirection = location.y - loc2.y;
 
-        Tile pushLoc = GridManager.Instance.GetTile(new Vector2(location.x + xDirection, location.y + yDirection));
+        Vector2 direction = new Vector2(location.x + xDirection, location.y + yDirection);
+
+        Tile pushLoc = GridManager.Instance.GetTile(direction);
 
         if(pushLoc.isWalkable() && pushLoc.GetUnit() == null)
         {
@@ -160,6 +176,7 @@ public class Tile : PathfinderNode
     // A* Search Algorithm
     public List<Tile> FindPath(Tile target, Unit.Faction faction)
     {
+        Debug.Log(target);
         this.SetCosts(0,0);
         List<Tile> openList = new List<Tile>();
         List<Tile> closedList = new List<Tile>();
@@ -179,7 +196,7 @@ public class Tile : PathfinderNode
 
             foreach(Tile i in currentTile)
             {
-                if(i.isWalkable(faction) || i == target)
+                if(i == target || i.isWalkable(faction))
                 {
                     if(closedList.Contains(i))
                     {
@@ -197,6 +214,14 @@ public class Tile : PathfinderNode
                     openList.Add(i);
                 }
             }
+        }
+        foreach(Tile i in closedList)
+        {
+            i.Reset();
+        }
+        foreach(Tile i in openList)
+        {
+            i.Reset();
         }
         return null;
     }

@@ -66,6 +66,7 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.AllyTurn:
                 // Following line is temp logic
+                UnitManager.Instance.AllyMoveTurn();
                 ChangeState(GameState.EnemyMoveTurn);
                 break;
             case GameState.EnemyMoveTurn:
@@ -91,6 +92,7 @@ public class GameManager : MonoBehaviour
                 victory.SetActive(true);
                 break;
             case GameState.Defeat:
+                UnitManager.Instance.ExhaustAll();
                 defeat.SetActive(true);
                 break;
         }

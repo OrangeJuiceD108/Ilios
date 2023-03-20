@@ -3248,12 +3248,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d02aea572bf80634784cc61475ceed6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allyDeaths: 1
   playerUnitPrefabs:
   - {fileID: 5311099613785362412, guid: 829d7cd323bf1b24fa0ffb2298553ed4, type: 3}
   - {fileID: 2596474240928967280, guid: 67dafdfa57af64746bc1b34ffd0d26ec, type: 3}
   enemyUnitPrefabs:
   - {fileID: 2126265736017491407, guid: 350e2832d8567e940a94283fc0fd2b03, type: 3}
-  alliedUnitPrefabs: []
+  alliedUnitPrefabs:
+  - {fileID: 1560354171250762162, guid: 8b174e1ffef3e29419c2188a2ac41ebf, type: 3}
   playerUnits: []
 --- !u!1 &679232045
 GameObject:

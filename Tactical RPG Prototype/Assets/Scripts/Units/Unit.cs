@@ -193,11 +193,27 @@ public abstract class Unit : MonoBehaviour
 
     public bool AttackRadiusIsEmpty()
     {
+        Debug.Log(currentAttackRadius.Count == 0);
         return currentAttackRadius.Count == 0;
     }
 
+    public void AddToAttackRadius(Tile tile)
+    {
+        currentAttackRadius.Add(tile);
+        tile.enemyHighlight.enabled = true;
+    }
+    public void RemoveFromAttackRadius(Tile tile)
+    {
+        currentAttackRadius.Remove(tile);
+        tile.enemyHighlight.enabled = false;
+    }
+    public Tile GetAttackRadiusAt(int index)
+    {
+        return currentAttackRadius[index];
+    }
+
     // Removes unit from tile that it is on and then destroys it
-    public void Die()
+    public virtual void Die()
     {
         currentTile.RemoveUnit();
         UnitManager.Instance.DeleteUnit(this);

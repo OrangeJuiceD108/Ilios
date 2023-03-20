@@ -11,6 +11,8 @@ public class UnitManager : MonoBehaviour
         Instance = this;
     }
 
+    [SerializeField] int allyDeaths;
+
     // Contains the list of unit prefabs
     public GameObject[] playerUnitPrefabs;
     public GameObject[] enemyUnitPrefabs;
@@ -32,7 +34,6 @@ public class UnitManager : MonoBehaviour
         Digit 6:            The array the unit is contained in, 1 = player, 2 = enemy, 3 = ally
     */
     private List<int> plannedUnits = new List<int>();
-
 
     // This function spawns the units, right now most of the functionality is not there, this function's code will probably get replaced
     public void GenerateUnits()
@@ -86,6 +87,20 @@ public class UnitManager : MonoBehaviour
         else
         {
             alliedUnits.Remove(unit);
+            if(alliedUnits.Count == 0 && allyDeaths != 0)
+            {
+                GameManager.Instance.ChangeState(GameState.Victory);
+            }
+        }
+    }
+
+    public void AllyDeath()
+    {
+        allyDeaths -= 1;
+        if(allyDeaths <= 0)
+        {
+            UnitManager.Instance.ExhaustAll();
+            GameManager.Instance.ChangeState(GameState.Defeat);
         }
     }
 
@@ -199,6 +214,14 @@ public class UnitManager : MonoBehaviour
         }
     }
 
+    public void AllyMoveTurn()
+    {
+        for(int i = alliedUnits.Count - 1; i >= 0; i--)
+        {
+            alliedUnits[i].ChangeUnitState(Unit.UnitState.Move);
+        }
+    }
+
     public void StartPlayerTurn()
     {
         foreach(Unit i in playerUnits)
@@ -241,7 +264,7 @@ public class UnitManager : MonoBehaviour
 
     public bool TryLoss()
     {
-        if(playerUnits.Count == 0)
+        if(playerUnits.Count == 0 || allyDeaths == 0)
         {
             GameManager.Instance.ChangeState(GameState.Defeat);
             return true;

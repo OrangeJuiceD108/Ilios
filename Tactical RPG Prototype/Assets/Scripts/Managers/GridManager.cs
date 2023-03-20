@@ -28,6 +28,10 @@ public class GridManager : MonoBehaviour
     [Header("Grid Dimensions")]
     
     [SerializeField] private int width, height;
+
+
+
+    private Tile goalTile;
     
 
 
@@ -41,7 +45,7 @@ public class GridManager : MonoBehaviour
         Digit 1                         Digit 2                     Digit 3
         0 => Walkable Tile              0 => Empty Tile             0 => Unit in the 0 position
         1 => Impassable Tile            1 => Player Unit            1 => Unit in the 1 position
-                                        2 => Enemy Unit             etc.
+        2 => Goal Tile                  2 => Enemy Unit             etc.
                                         3 => NPC Unit
     */
     private int[,] intMap;
@@ -85,6 +89,11 @@ public class GridManager : MonoBehaviour
                 else
                 {
                     newTile.SetWalkable(true);
+                    if(intMap[x,y] / 100 == 2)
+                    {
+                        goalTile = newTile;
+                        newTile.goalHighlight.enabled = true;
+                    }
                 }
 
                 if((intMap[x,y] / 10) % 10 > 0)
@@ -132,6 +141,11 @@ public class GridManager : MonoBehaviour
             return retTile;
         }
         return null;
+    }
+
+    public Tile GetGoalTile()
+    {
+        return goalTile;
     }
 
     // Might need a set tile function at some point for modifying terrain (abilities that create walls and such). Could also do this on the tile itself with variables for maneuverability on the tiles and methods to change those variables.

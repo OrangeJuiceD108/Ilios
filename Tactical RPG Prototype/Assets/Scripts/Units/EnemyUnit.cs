@@ -21,13 +21,19 @@ public class EnemyUnit : Unit
             case UnitState.Move:
                 GenerateMoveRadius();
                 Unit nearestUnit = UnitManager.Instance.NearestUnit(Faction.PlayerOrNPC, currentTile.GetLocation());
+                Debug.Log(nearestUnit);
+                Debug.Log(nearestUnit.GetTile());
                 List<Tile> path = currentTile.FindPath(nearestUnit.GetTile(), faction);
-                UnitManager.Instance.UpdatePosition(this, FindOpenSpace(path));
-                if(currentTile == path[path.Count - 2])
+                Debug.Log(path);
+                if(path != null)
                 {
-                    Tile tile = path[path.Count - 1];
-                    currentAttackRadius.Add(tile);
-                    tile.enemyHighlight.enabled = true;
+                    UnitManager.Instance.UpdatePosition(this, FindOpenSpace(path));
+                    if(currentTile == path[path.Count - 2])
+                    {
+                        Tile tile = path[path.Count - 1];
+                        currentAttackRadius.Add(tile);
+                        tile.enemyHighlight.enabled = true;
+                    }
                 }
                 break;
             case UnitState.Action:
@@ -46,7 +52,6 @@ public class EnemyUnit : Unit
                 ChangeUnitState(UnitState.Exhausted);
                 break;
             case UnitState.Exhausted:
-                
                 break;
         }
     }
