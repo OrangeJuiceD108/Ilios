@@ -43,7 +43,7 @@ public class GridManager : MonoBehaviour
     // Integer three represents the index of the unit prefab in the unit array for the given faction
     /*  Key is as follows
         Digit 1                         Digit 2                     Digit 3
-        0 => Walkable Tile              0 => Empty Tile             0 => Unit in the 0 position
+        0 => Walkable Tile              0 => Empty Tile             0 => Unit in the 0 position (Aeneas if Player)
         1 => Impassable Tile            1 => Player Unit            1 => Unit in the 1 position
         2 => Goal Tile                  2 => Enemy Unit             etc.
                                         3 => NPC Unit

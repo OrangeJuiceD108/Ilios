@@ -3250,8 +3250,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allyDeaths: 1
   playerUnitPrefabs:
-  - {fileID: 5311099613785362412, guid: 829d7cd323bf1b24fa0ffb2298553ed4, type: 3}
   - {fileID: 2596474240928967280, guid: 67dafdfa57af64746bc1b34ffd0d26ec, type: 3}
+  - {fileID: 5311099613785362412, guid: 829d7cd323bf1b24fa0ffb2298553ed4, type: 3}
   enemyUnitPrefabs:
   - {fileID: 2126265736017491407, guid: 350e2832d8567e940a94283fc0fd2b03, type: 3}
   alliedUnitPrefabs:

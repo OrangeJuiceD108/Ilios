@@ -12,6 +12,7 @@ public class UnitManager : MonoBehaviour
     }
 
     [SerializeField] int allyDeaths;
+    Unit aeneas;
 
     // Contains the list of unit prefabs
     public GameObject[] playerUnitPrefabs;
@@ -19,7 +20,7 @@ public class UnitManager : MonoBehaviour
     public GameObject[] alliedUnitPrefabs;
 
     // The unit currently selected by the player
-    private Unit selectedUnit;
+    [SerializeField] private Unit selectedUnit;
 
     // Lists of each type of unit
     [SerializeField] private List<Unit> playerUnits = new List<Unit>();
@@ -47,6 +48,10 @@ public class UnitManager : MonoBehaviour
                 code /= 10;
                 newUnit = Instantiate(playerUnitPrefabs[(code % 10)]).GetComponent<Unit>();
                 playerUnits.Add(newUnit);
+                if(code % 10 == 0)
+                {
+                    aeneas = newUnit;
+                }
             }
             else if(i % 10 == 2)
             {
@@ -83,6 +88,10 @@ public class UnitManager : MonoBehaviour
         else if (faction == Unit.Faction.Player)
         {
             playerUnits.Remove(unit);
+            if(unit == aeneas)
+            {
+                aeneas = null;
+            }
         }
         else
         {
@@ -200,17 +209,25 @@ public class UnitManager : MonoBehaviour
 
     public void EnemyMoveTurn()
     {
-        foreach(Unit i in enemyUnits)
+        // foreach(Unit i in enemyUnits)
+        // {
+        //     i.ChangeUnitState(Unit.UnitState.Move);
+        // }
+        for(int i = enemyUnits.Count - 1; i >= 0; i--)
         {
-            i.ChangeUnitState(Unit.UnitState.Move);
+            enemyUnits[i].ChangeUnitState(Unit.UnitState.Move);
         }
     }
 
     public void RunEnemyAttacks()
     {
-        foreach(Unit i in enemyUnits)
+        // foreach(Unit i in enemyUnits)
+        // {
+        //     i.ChangeUnitState(Unit.UnitState.Action);
+        // }
+        for(int i = enemyUnits.Count - 1; i >= 0; i--)
         {
-            i.ChangeUnitState(Unit.UnitState.Action);
+            enemyUnits[i].ChangeUnitState(Unit.UnitState.Action);
         }
     }
 
@@ -264,8 +281,9 @@ public class UnitManager : MonoBehaviour
 
     public bool TryLoss()
     {
-        if(playerUnits.Count == 0 || allyDeaths == 0)
+        if(playerUnits.Count == 0 || allyDeaths == 0 || aeneas == null)
         {
+            Debug.Log((playerUnits.Count == 0) + " " + (allyDeaths == 0) + " " + (aeneas == null));
             GameManager.Instance.ChangeState(GameState.Defeat);
             return true;
         }

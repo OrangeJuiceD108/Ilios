@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Tile : PathfinderNode
 {
@@ -60,7 +61,7 @@ public class Tile : PathfinderNode
             {
                 UnitManager.Instance.DeselectUnit();
             }
-            if(selectedUnit.GetUnitState() == Unit.UnitState.Action || selectedUnit.GetUnitState() == Unit.UnitState.Push)
+            if(selectedUnit.GetUnitState() == Unit.UnitState.Action || selectedUnit.GetUnitState() == Unit.UnitState.Attack || selectedUnit.GetUnitState() == Unit.UnitState.Push)
             {
                 if(!selectedUnit.AttackRadiusIsEmpty())
                 {
@@ -80,6 +81,9 @@ public class Tile : PathfinderNode
     */
     void OnMouseDown()
     {
+        if(EventSystem.current.IsPointerOverGameObject())
+        {return;}
+        Debug.Log(this);
         Unit currUnit;
         if(UnitManager.Instance.TryGetUnit(out currUnit))
         {
@@ -129,7 +133,7 @@ public class Tile : PathfinderNode
         }
         else
         {
-            if(unit != null && unit.GetUnitState() == Unit.UnitState.Move)
+            if(unit != null && unit.GetFaction() == Unit.Faction.Player && unit.GetUnitState() == Unit.UnitState.Move)
             {
                 UnitManager.Instance.SelectUnit(unit);
             }

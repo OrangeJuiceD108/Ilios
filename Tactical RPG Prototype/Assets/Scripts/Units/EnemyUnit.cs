@@ -67,4 +67,12 @@ public class EnemyUnit : Unit
         }
         return list[0];
     }
+
+    public override void Die()
+    {
+        currentTile.RemoveUnit();
+        UnitManager.Instance.DeleteUnit(this);
+        currentAttackRadius[0].enemyHighlight.enabled = false;
+        Destroy(gameObject);
+    }
 }
