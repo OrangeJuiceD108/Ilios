@@ -1824,6 +1824,7 @@ MonoBehaviour:
   - {fileID: 2126265736017491407, guid: 350e2832d8567e940a94283fc0fd2b03, type: 3}
   alliedUnitPrefabs:
   - {fileID: 1560354171250762162, guid: 8b174e1ffef3e29419c2188a2ac41ebf, type: 3}
+  selectedUnit: {fileID: 0}
   playerUnits: []
 --- !u!114 &803217715 stripped
 MonoBehaviour:
