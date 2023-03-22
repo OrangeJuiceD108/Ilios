@@ -83,7 +83,7 @@ public class Tile : PathfinderNode
     {
         if(EventSystem.current.IsPointerOverGameObject())
         {return;}
-        Debug.Log(this);
+        // Debug.Log(this);
         Unit currUnit;
         if(UnitManager.Instance.TryGetUnit(out currUnit))
         {

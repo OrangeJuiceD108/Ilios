@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -90,12 +91,33 @@ public class GameManager : MonoBehaviour
             case GameState.Victory:
                 UnitManager.Instance.ExhaustAll();
                 victory.SetActive(true);
+                if(SceneManager.GetActiveScene().name == "Scene_1")
+                {
+                    Invoke("LoadScene2", 5.0f);
+                }
                 break;
             case GameState.Defeat:
                 UnitManager.Instance.ExhaustAll();
                 defeat.SetActive(true);
+                if(SceneManager.GetActiveScene().name == "Scene_1")
+                {
+                    Invoke("LoadScene1", 5.0f);
+                }
+                else if(SceneManager.GetActiveScene().name == "Scene_2")
+                {
+                    Invoke("LoadScene2", 5.0f);
+                }
                 break;
         }
+    }
+
+    void LoadScene2()
+    {
+        SceneManager.LoadScene("Scene_2", LoadSceneMode.Single);
+    }
+    void LoadScene1()
+    {
+        SceneManager.LoadScene("Scene_1", LoadSceneMode.Single);
     }
 }
 

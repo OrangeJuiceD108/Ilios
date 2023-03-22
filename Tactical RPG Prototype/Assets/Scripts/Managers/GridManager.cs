@@ -13,7 +13,7 @@ public class GridManager : MonoBehaviour
     }
 
     // This stores the camera so that it can be moved when generating the grid
-    public new GameObject camera;
+    public GameObject camera;
     
 
 
